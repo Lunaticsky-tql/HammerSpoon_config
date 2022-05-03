@@ -73,7 +73,7 @@ end)
 
 hyper2:bind({}, "1", function()
   local qqq=hs.canvas.defaultTextStyle()
-  
+
   hyper2.triggered = true
 end)
 
@@ -82,9 +82,21 @@ hyper:bind({}, "s", function()
   hyper.triggered = true
 end)
 
+  -- to activate an applescript
+--   local script=[[
+--     -- ignoring application responses
+-- tell application "Keyboard Maestro Engine"
+-- 	do script "B0620731-234E-4757-AC8B-D1E595F9FC0A"
+-- 	-- or: do script "Search the Baidu"
+-- 	-- or: do script "B0620731-234E-4757-AC8B-D1E595F9FC0A" with parameter "Whatever"
+-- end tell
+-- -- end ignoring
+--   ]]
+--   hs.osascript.applescript(script)
+
 -- a potentially useful demo
 -- function newWindow() 
---   local app = hs.application.find("Firefox")
+--   local app =` hs.application.find("Firefox")
 --   app:selectMenuItem({"文件", "新建窗口"})
 -- end
 -- hs.hotkey.bind({'alt', 'ctrl', 'cmd'}, 'n', newWindow)
