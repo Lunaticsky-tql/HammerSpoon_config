@@ -18,7 +18,13 @@ end
 function exitHyperMode()
   hyper:exit()
   if not hyper.triggered then
-    hs.eventtap.keyStroke({},'escape')
+    --if the firefox is open, close the current tab
+    local firefox = hs.application.get("Firefox")
+    if firefox:isFrontmost() then
+      hs.eventtap.keyStroke({"cmd"}, "w")
+    else
+      hs.eventtap.keyStroke({}, "escape")
+    end
   end
 end
 
@@ -186,10 +192,11 @@ end)
 --   hyper2.triggered = true
 -- end)
 
-hyper2:bind({}, "s", function()
+hyper:bind({}, "b", function()
   local applescript=[[
 display dialog "表单" default answer "输入框内容" buttons {"按钮1", "按钮2", "按钮3"} default button 1 with icon caution
 copy the result as list to {text_returned, button_pressed} --返回一个列表{文本,按钮}
+
 
     ]]
     --get the list of the result applescript returns
@@ -200,25 +207,11 @@ copy the result as list to {text_returned, button_pressed} --返回一个列表{
     print(type(list))     
     print(list[1])
     print(list[2])
-  hyper2.triggered = true
+  hyper.triggered = true
 end)
 
 
--- hyper2:bind({}, "1", function()
--- --keep the current focused window on top
---   while true do
---     local win = hs.window.focusedWindow()
---     if win then
---       win:focus()
---       hs.timer.usleep(100000)
---     else
---       break
---     end
---   end
---   hyper2.triggered = true
--- end)
-
-hyper:bind({}, "s", function()
+hyper:bind({}, "z", function()
   --activate text scanner and scan the text
   --if the text scanner is not running, start it
   local app=hs.application.get('Text Scanner')
@@ -234,31 +227,21 @@ hyper:bind({}, "s", function()
   hyper.triggered = true
 end)
 
-
--- hyper:bind({}, "x", function()
---   --use applescript to create a input dialog
---   local applescript=[[
---     tell application "System Events"
---       set dialog_text to "Please input the name of the file:"
---       set dialog_title to "Input Dialog"
---       set dialog_default to "default"
---       set the_text to "aaa"
---       set the_text to display dialog dialog_text default answer dialog_default
---       return the_text
---     end tell
---   ]]
---   --get the input from the dialog
---   input = hs.osascript.applescript(applescript)
---   hs.alert.show(input)
---   --create a file with the input name
---   file = io.open(input,"w")
---   --close the file
---   file:close()
---   --open the file
---   hs.application.open(input)
---   hyper.triggered = true
--- end)
-
+hyper:bind({}, "s", function()
+  local text=hs.pasteboard.readString()
+ --open search url in the terminal
+  local applescript=[[
+    tell application "Terminal"
+      do script "open 'https://www.baidu.com/baidu?tn=monline_3_dg&ie=utf-8&wd=]]..text..[['"
+    end tell
+    #wait for the command to finish
+    delay 0.5
+    #quit the terminal
+    tell application "Terminal" to quit
+  ]]
+  local response=hs.osascript.applescript(applescript)
+  hyper.triggered = true
+end)
 
   -- to activate an applescript
 --   local script=[[
