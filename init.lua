@@ -12,14 +12,13 @@ function enterHyperMode2()
   hyper2:enter()
 end
 
-
+firefox = hs.application.get("Firefox")
 -- Leave Hyper Mode when F18 (Hyper/Capslock) is pressed,
 -- send ESCAPE if no other keys are pressed.
 function exitHyperMode()
   hyper:exit()
   if not hyper.triggered then
     --if the firefox is open, close the current tab
-    local firefox = hs.application.get("Firefox")
     if firefox:isFrontmost() then
       hs.eventtap.keyStroke({"cmd"}, "w")
     else
@@ -31,13 +30,19 @@ end
 function exitHyperMode2()
   hyper2:exit()
   if not hyper2.triggered then
-    hs.eventtap.keyStrokes('`')
+    if firefox:isFrontmost() then
+      hs.eventtap.keyStroke({"cmd"}, "t")
+    else
+      hs.eventtap.keyStrokes('`')
+    end
+
   end
 end
 
 -- Bind the Hyper key
 f18 = hs.hotkey.bind({}, 'F18', enterHyperMode, exitHyperMode)
 f15 = hs.hotkey.bind({}, 'F15', enterHyperMode2, exitHyperMode2)
+
 
 hyper:bind({}, "a", function()
   x = hs.application.open("/System/Library/CoreServices/Finder.app")
@@ -49,7 +54,10 @@ hyper:bind({}, "w", function()
   hyper.triggered = true
 end)
 
+--[translate in deepl]
 hyper:bind({}, "d", function()
+  hyper.triggered = true
+  hs.eventtap.keyStroke({'cmd'}, 'c')
   --get the text in the pasteboard
   local text = hs.pasteboard.getContents() 
   local translate_script=[[
@@ -73,26 +81,23 @@ hyper:bind({}, "d", function()
     hs.timer.doAfter(0.5, function()
     local success,result=hs.osascript.applescript(translate_script)
     if success then
+      hs.alert.show("translate success")
       hs.pasteboard.setContents(result)
     end
     end)
   else
-    print(translate_script)
     local success,result=hs.osascript.applescript(translate_script)
-    hs.alert.show(result)
     if success then
       hs.alert.show("translate success")
       hs.pasteboard.setContents(result)
     end
   end  
-
-  hyper.triggered = true
 end)
 
-sql_input=[[```sql]]
-
+--[add sql code block in typora]
 hyper:bind({},"q", function()
 
+  local sql_input=[[```sql]]
   local app=hs.application.get('Typora')
   if app:isFrontmost() then
     local temp_clipboard = hs.pasteboard.uniquePasteboard()
@@ -108,27 +113,8 @@ hyper:bind({},"q", function()
   hyper.triggered = true
 end)
 
---test module
--- hyper:bind({}, "c", function()
---   -- menubar = hs.menubar.new(false)
---   -- menubar:setTitle("Hidden Menu")
---   -- menubar:setMenu( {
---   --     { title = "菜单", fn = function() hs.alert.show("you clicked the item!") end },
---   --     { title = "444" },
---   --   {title="555"}} )
---   -- menubar:popupMenu(hs.mouse.getAbsolutePosition(), true)
---   local table=hs.pasteboard.allContentTypes()
---   for i=1,#table[1] do
---     print(type(table[1][i]))
---   end
---   print(#table[1])
---   local nowcontent=hs.pasteboard.getContents()
---   hs.alert.show(nowcontent)
---   hyper.triggered = true
--- end)
-
+--[change the color of selected select text in typora]
 hyper:bind({}, "c", function()
-  --change the color of selected select text in typora
   local app=hs.application.get('Typora')
   local color=""
   local text=""
@@ -158,19 +144,68 @@ hyper:bind({}, "c", function()
   hyper.triggered = true
 end)
 
+
+-- --[activate text scanner and scan the text]
+-- hyper:bind({}, "z", function()
+--   --if the text scanner is not running, start it
+--   local app=hs.application.get('Text Scanner')
+--   if not app then
+--     local scanner = hs.application.launchOrFocus('Text Scanner')
+--     --wait for the text scanner to launch
+--     hs.timer.doAfter(0.5, function()
+--       hs.eventtap.keyStroke({'ctrl','cmd'}, '0')
+--     end)
+--   else
+--     hs.eventtap.keyStroke({'ctrl','cmd'}, '0')
+--   end  
+--   hyper.triggered = true
+-- end)
+
+
+
+
+------------(hyper 2 keybindings)-----------------------------------------------------
+
+--[sign my homework]
 hyper2:bind({}, "2", function()
   hs.eventtap.keyStrokes('2013599_田佳业_')
   hyper2.triggered = true
 end)
 
+--[pin the current window]
 hyper2:bind({}, "q", function()
-  --save the information of the window focused and activate it later
   win = hs.window.focusedWindow()
   hs.alert.show(win:title().."  is saved",0.5)
-  -- win_id = win:id()
-  -- hs.alert.show("Window ID: "..win_id)
   hyper2.triggered = true
 end)
+
+--[show the pinned window]
+hyper2:bind({}, "w", function()
+  --focus the window saved in parameter win
+  win:focus()
+  hyper2.triggered = true
+end)
+
+--test module
+-- hyper:bind({}, "c", function()
+--   -- menubar = hs.menubar.new(false)
+--   -- menubar:setTitle("Hidden Menu")
+--   -- menubar:setMenu( {
+--   --     { title = "菜单", fn = function() hs.alert.show("you clicked the item!") end },
+--   --     { title = "444" },
+--   --   {title="555"}} )
+--   -- menubar:popupMenu(hs.mouse.getAbsolutePosition(), true)
+--   local table=hs.pasteboard.allContentTypes()
+--   for i=1,#table[1] do
+--     print(type(table[1][i]))
+--   end
+--   print(#table[1])
+--   local nowcontent=hs.pasteboard.getContents()
+--   hs.alert.show(nowcontent)
+--   hyper.triggered = true
+-- end)
+
+
 
 
 -- hyper2:bind({}, "a", function()
@@ -192,43 +227,40 @@ end)
 --   hyper2.triggered = true
 -- end)
 
-hyper:bind({}, "b", function()
-  local applescript=[[
-display dialog "表单" default answer "输入框内容" buttons {"按钮1", "按钮2", "按钮3"} default button 1 with icon caution
-copy the result as list to {text_returned, button_pressed} --返回一个列表{文本,按钮}
+-- hyper:bind({}, "b", function()
+--   local applescript=[[
+-- display dialog "表单" default answer "输入框内容" buttons {"按钮1", "按钮2", "按钮3"} default button 1 with icon caution
+-- copy the result as list to {text_returned, button_pressed} --返回一个列表{文本,按钮}
 
 
-    ]]
-    --get the list of the result applescript returns
-    local response
-    local list
-    response,list = hs.osascript.applescript(applescript)
-    print(response)
-    print(type(list))     
-    print(list[1])
-    print(list[2])
-  hyper.triggered = true
-end)
+--     ]]
+--     --get the list of the result applescript returns
+--     local response
+--     local list
+--     response,list = hs.osascript.applescript(applescript)
+--     print(response)
+--     print(type(list))     
+--     print(list[1])
+--     print(list[2])
+--   hyper.triggered = true
+-- end)
 
 
-hyper:bind({}, "z", function()
-  --activate text scanner and scan the text
-  --if the text scanner is not running, start it
-  local app=hs.application.get('Text Scanner')
-  if not app then
-    local scanner = hs.application.launchOrFocus('Text Scanner')
-    --wait for the text scanner to launch
-    hs.timer.doAfter(0.5, function()
-      hs.eventtap.keyStroke({'ctrl','cmd'}, '0')
-    end)
-  else
-    hs.eventtap.keyStroke({'ctrl','cmd'}, '0')
-  end  
-  hyper.triggered = true
-end)
+
 
 hyper:bind({}, "s", function()
+  win = hs.window.focusedWindow()
+  hs.eventtap.keyStroke({'cmd'}, 'c')
   local text=hs.pasteboard.readString()
+  --if there is quotation marks in the text, escape them
+  if string.find(text, '"') then
+    local temp1="%%22"
+    text=string.gsub(text, '["]', temp1)
+  end
+  if string.find(text, "'") then
+    local temp2="%%27"
+    text=string.gsub(text, "[']", temp2)
+  end
  --open search url in the terminal
   local applescript=[[
     tell application "Terminal"
@@ -236,7 +268,6 @@ hyper:bind({}, "s", function()
     end tell
     #wait for the command to finish
     delay 0.5
-    #quit the terminal
     tell application "Terminal" to quit
   ]]
   local response=hs.osascript.applescript(applescript)
@@ -267,5 +298,4 @@ hyper:bind({}, "r", function()
   hs.reload()
   hyper.triggered = true
 end)
-
 hs.alert("Config loaded")
