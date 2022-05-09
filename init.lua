@@ -1,6 +1,9 @@
--- A global variable for the Hyper Mode
+
+wf=hs.window.filter
 hyper = hs.hotkey.modal.new({}, 'F19')
 hyper2 = hs.hotkey.modal.new({}, 'F16')
+firefox = hs.application.get("Firefox")
+
 -- Enter Hyper Mode when F18 (Hyper/Capslock) is pressed
 function enterHyperMode()
   hyper.triggered = false
@@ -12,7 +15,7 @@ function enterHyperMode2()
   hyper2:enter()
 end
 
-firefox = hs.application.get("Firefox")
+
 -- Leave Hyper Mode when F18 (Hyper/Capslock) is pressed,
 -- send ESCAPE if no other keys are pressed.
 function exitHyperMode()
@@ -20,6 +23,7 @@ function exitHyperMode()
   if not hyper.triggered then
     --if the firefox is open, close the current tab
     if firefox:isFrontmost() then
+      --close the current tab more conviniently
       hs.eventtap.keyStroke({"cmd"}, "w")
     else
       hs.eventtap.keyStroke({}, "escape")
@@ -35,22 +39,27 @@ function exitHyperMode2()
     else
       hs.eventtap.keyStrokes('`')
     end
-
   end
 end
 
+hs.hotkey.bind({"shift"}, "F15", function()
+  hs.eventtap.keyStrokes('~')
+end)
+
+
+
 -- Bind the Hyper key
-f18 = hs.hotkey.bind({}, 'F18', enterHyperMode, exitHyperMode)
-f15 = hs.hotkey.bind({}, 'F15', enterHyperMode2, exitHyperMode2)
+F18 = hs.hotkey.bind({}, 'F18', enterHyperMode, exitHyperMode)
+F15 = hs.hotkey.bind({}, 'F15', enterHyperMode2, exitHyperMode2)
 
 
 hyper:bind({}, "a", function()
-  x = hs.application.open("/System/Library/CoreServices/Finder.app")
+  hs.application.open("/System/Library/CoreServices/Finder.app")
   hyper.triggered = true
 end)
 
 hyper:bind({}, "w", function()
-  x = hs.application.open("/Applications/Typora.app")
+  hs.application.open("/Applications/Typora.app")
   hyper.triggered = true
 end)
 
@@ -75,23 +84,26 @@ hyper:bind({}, "d", function()
     end tell
     ]]
   local app=hs.application.get('DeepL')
-  if not app then
-    local deepl = hs.application.launchOrFocus('DeepL')
-    --wait for the DeepL to launch
-    hs.timer.doAfter(0.5, function()
+  local main_win = app:mainWindow()
+    hs.alert.show(main_win)
+    if not main_win then
+      hs.alert.show("main window not found")
+      hs.application.open('/Applications/DeepL.app')
+      hs.timer.doAfter(0.5, function()
+        local success,result=hs.osascript.applescript(translate_script)
+        if success then
+          hs.alert.show("translate success")
+          hs.pasteboard.setContents(result)
+        end
+        end)
+      -- hs.eventtap.keyStroke({'cmd'}, '0')
+    else
     local success,result=hs.osascript.applescript(translate_script)
     if success then
       hs.alert.show("translate success")
       hs.pasteboard.setContents(result)
     end
-    end)
-  else
-    local success,result=hs.osascript.applescript(translate_script)
-    if success then
-      hs.alert.show("translate success")
-      hs.pasteboard.setContents(result)
-    end
-  end  
+  end
 end)
 
 --[add sql code block in typora]
@@ -174,17 +186,18 @@ end)
 
 --[pin the current window]
 hyper2:bind({}, "q", function()
-  win = hs.window.focusedWindow()
-  hs.alert.show(win:title().."  is saved",0.5)
+  Win = hs.window.focusedWindow()
+  hs.alert.show(Win:title().."  is saved",0.5)
   hyper2.triggered = true
 end)
 
 --[show the pinned window]
 hyper2:bind({}, "w", function()
   --focus the window saved in parameter win
-  win:focus()
+  Win:focus()
   hyper2.triggered = true
 end)
+
 
 --test module
 -- hyper:bind({}, "c", function()
@@ -247,9 +260,9 @@ end)
 
 
 
-
 hyper:bind({}, "s", function()
-  win = hs.window.focusedWindow()
+  hyper.triggered = true
+  Win = hs.window.focusedWindow()
   hs.eventtap.keyStroke({'cmd'}, 'c')
   local text=hs.pasteboard.readString()
   --if there is quotation marks in the text, escape them
@@ -271,7 +284,7 @@ hyper:bind({}, "s", function()
     tell application "Terminal" to quit
   ]]
   local response=hs.osascript.applescript(applescript)
-  hyper.triggered = true
+
 end)
 
   -- to activate an applescript
@@ -292,7 +305,39 @@ end)
 --   app:selectMenuItem({"文件", "新建窗口"})
 -- end
 -- hs.hotkey.bind({'alt', 'ctrl', 'cmd'}, 'n', newWindow)
+--make a hot key enables in a certain window
 
+------------(firefox shortcut)-----------------------------------------------------
+
+tab_open=hs.hotkey.new({}, 'tab', function()
+  hs.alert.show("tab open")
+  local now_win = hs.window.focusedWindow()
+  --get title
+  local title = now_win:title()
+  --if the title contains "Notebook", which means it is a notebook window, do not bind the hotkeys
+  if string.find(title, "Notebook") then
+    hs.eventtap.keyStrokes('    ')
+    else
+    hs.eventtap.keyStroke({'cmd'}, 't')
+    end
+  end)
+
+function enable_binds()
+    --bind the hotkeys
+     tab_open:enable()
+end
+
+function disable_binds()
+    --disable the hotkeys
+ tab_open:disable()
+end
+
+
+wf_firefox=wf.new{'Firefox'}
+wf_firefox:subscribe(wf.windowFocused, enable_binds)
+wf_firefox:subscribe(wf.windowUnfocused, disable_binds)
+
+------------(reload config)-----------------------------------------------------
 hyper:bind({}, "r", function()
   hs.eventtap.keyStroke({'cmd'}, 's')
   hs.reload()
