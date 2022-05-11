@@ -99,7 +99,7 @@ hyper:bind({}, "d", function()
     local success,result=hs.osascript.applescript(translate_script)
     if success then
       hs.alert.show("translate success")
-      app:activate()
+      -- app:activate()
       hs.pasteboard.setContents(result)
     end
   end
@@ -109,8 +109,8 @@ end)
 hyper:bind({},"q", function()
 
   local sql_input=[[```sql]]
-  local app=hs.application.get('Typora')
-  if app:isFrontmost() then
+  local typora=hs.application.get('Typora')
+  if typora:isFrontmost() then
     local temp_clipboard = hs.pasteboard.uniquePasteboard()
     hs.pasteboard.writeAllData(temp_clipboard,hs.pasteboard.readAllData(nil))
     hs.pasteboard.writeObjects(sql_input)
@@ -120,6 +120,28 @@ hyper:bind({},"q", function()
     hs.eventtap.keyStroke({}, 'return')
   else
     local ssh = hs.application.open('Termius')
+  end
+  hyper.triggered = true
+end)
+
+hyper:bind({},"t", function()
+  --copy path and open in terminal
+  local finder=hs.application.get('访达')
+  if(finder:isFrontmost()) then
+    hs.eventtap.keyStroke({'cmd','alt'}, 'c')
+    --get the path of current file
+    local path = hs.pasteboard.getContents()
+    -- open in terminal
+    local terminal = hs.application.open('Terminal')
+    --open terminal in given path
+    local temp_clipboard = hs.pasteboard.uniquePasteboard()
+    hs.pasteboard.writeAllData(temp_clipboard,hs.pasteboard.readAllData(nil))
+    local terminal_path = 'cd '..path
+    hs.pasteboard.writeObjects(terminal_path)
+    hs.eventtap.keyStroke({'cmd'}, 'v')
+    hs.pasteboard.writeAllData(nil,hs.pasteboard.readAllData(temp_clipboard))
+    hs.pasteboard.deletePasteboard(temp_clipboard)
+    hs.eventtap.keyStroke({}, 'return')
   end
   hyper.triggered = true
 end)
@@ -236,27 +258,6 @@ end)
 -- end)
 
 
-
-
--- hyper2:bind({}, "a", function()
---   --activate the deepL
---   local app=hs.application.get('Deepl')
---   hs.application.open("/Applications/Deepl.app")
---   --enter the text in deepl input box
---   local text="aaaa"
---   local applescript=[[
---     tell application "System Events"
---       tell process "DeepL"
---       set value of text area 1 of group 4 of group 2 of group 1 of UI element1 of scroll area 1 of group 1 of group 1 of window 1 of application process "DeepL" to "]]..text..[["
---       end tell
-
---   ]]
---   local response=hs.osascript.applescript(applescript)
---   hs.alert.show(response,0.5)
-
---   hyper2.triggered = true
--- end)
-
 -- hyper:bind({}, "b", function()
 --   local applescript=[[
 -- display dialog "表单" default answer "输入框内容" buttons {"按钮1", "按钮2", "按钮3"} default button 1 with icon caution
@@ -291,17 +292,8 @@ hyper:bind({}, "s", function()
     local temp2="%%27"
     text=string.gsub(text, "[']", temp2)
   end
- --open search url in the terminal
-  local applescript=[[
-    tell application "Terminal"
-      do script "open 'https://www.baidu.com/baidu?tn=monline_3_dg&ie=utf-8&wd=]]..text..[['"
-    end tell
-    #wait for the command to finish
-    delay 0.5
-    tell application "Terminal" to quit
-  ]]
-  local response=hs.osascript.applescript(applescript)
-
+  local shell_command = "open " .."'https://www.baidu.com/baidu?tn=monline_3_dg&ie=utf-8&wd="..text.."'"
+  hs.execute(shell_command)
 end)
 
 -- a potentially useful demo
@@ -326,20 +318,30 @@ tab_open=hs.hotkey.new({}, 'tab', function()
     end
   end)
 
-function enable_binds()
+
+function enable_firefox_binds()
     --bind the hotkeys
      tab_open:enable()
 end
 
-function disable_binds()
+function disable_firefox_binds()
     --disable the hotkeys
  tab_open:disable()
 end
-
+-- function enable_finder_binds()
+--   -- hs.alert.show("finder binds enabled")
+--   open_in_terminal:enable()
+-- end
+-- function disable_finder_binds()
+--   open_in_terminal:disable()
+-- end
 
 wf_firefox=wf.new{'Firefox'}
-wf_firefox:subscribe(wf.windowFocused, enable_binds)
-wf_firefox:subscribe(wf.windowUnfocused, disable_binds)
+wf_firefox:subscribe(wf.windowFocused, enable_firefox_binds)
+wf_firefox:subscribe(wf.windowUnfocused, disable_firefox_binds)
+-- wf_finder=wf.new{'访达'}
+-- wf_finder:subscribe(wf.windowFocused, enable_finder_binds)
+-- wf_finder:subscribe(wf.windowUnfocused, disable_finder_binds)
 
 ------------(reload config)-----------------------------------------------------
 hyper:bind({}, "r", function()
