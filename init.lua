@@ -85,9 +85,7 @@ hyper:bind({}, "d", function()
     ]]
   local app=hs.application.get('DeepL')
   local main_win = app:mainWindow()
-    hs.alert.show(main_win)
     if not main_win then
-      hs.alert.show("main window not found")
       hs.application.open('/Applications/DeepL.app')
       hs.timer.doAfter(0.5, function()
         local success,result=hs.osascript.applescript(translate_script)
@@ -101,6 +99,7 @@ hyper:bind({}, "d", function()
     local success,result=hs.osascript.applescript(translate_script)
     if success then
       hs.alert.show("translate success")
+      app:activate()
       hs.pasteboard.setContents(result)
     end
   end
@@ -134,7 +133,7 @@ hyper:bind({}, "c", function()
     menubar = hs.menubar.new(false)
     menubar:setTitle("Hidden Menu")
     menubar:setMenu( {
-        { title = "red", fn = function() color="red" end},
+        { title = "red", fn = function() color="Apricot" end},
         { title = "green", fn = function() color="green" end},
         { title = "blue", fn = function() color="blue" end}, })
     menubar:popupMenu(hs.mouse.getAbsolutePosition(),true)
@@ -179,7 +178,7 @@ end)
 ------------(hyper 2 keybindings)-----------------------------------------------------
 
 --[sign my homework]
-hyper2:bind({}, "2", function()
+hyper2:bind({}, "tab", function()
   hs.eventtap.keyStrokes('2013599_田佳业_')
   hyper2.triggered = true
 end)
@@ -191,10 +190,28 @@ hyper2:bind({}, "q", function()
   hyper2.triggered = true
 end)
 
+hyper2:bind({}, "1", function()
+  Win1 = hs.window.focusedWindow()
+  hs.alert.show(Win1:title().."  is saved as window 1",0.5)
+  hyper2.triggered = true
+end)
+
+hyper2:bind({}, "2", function()
+  Win2 = hs.window.focusedWindow()
+  hs.alert.show(Win2:title().."  is saved as window 2",0.5)
+  hyper2.triggered = true
+end)
+
 --[show the pinned window]
+hyper2:bind({}, "q", function()
+  --focus the window saved in parameter win
+  Win1:focus()
+  hyper2.triggered = true
+end)
+
 hyper2:bind({}, "w", function()
   --focus the window saved in parameter win
-  Win:focus()
+  Win2:focus()
   hyper2.triggered = true
 end)
 
@@ -287,21 +304,9 @@ hyper:bind({}, "s", function()
 
 end)
 
-  -- to activate an applescript
---   local script=[[
---     -- ignoring application responses
--- tell application "Keyboard Maestro Engine"
--- 	do script "B0620731-234E-4757-AC8B-D1E595F9FC0A"
--- 	-- or: do script "Search the Baidu"
--- 	-- or: do script "B0620731-234E-4757-AC8B-D1E595F9FC0A" with parameter "Whatever"
--- end tell
--- -- end ignoring
---   ]]
---   hs.osascript.applescript(script)
-
 -- a potentially useful demo
 -- function newWindow() 
---   local app =` hs.application.find("Firefox")
+--   local app =hs.application.find("Firefox")
 --   app:selectMenuItem({"文件", "新建窗口"})
 -- end
 -- hs.hotkey.bind({'alt', 'ctrl', 'cmd'}, 'n', newWindow)
@@ -310,7 +315,6 @@ end)
 ------------(firefox shortcut)-----------------------------------------------------
 
 tab_open=hs.hotkey.new({}, 'tab', function()
-  hs.alert.show("tab open")
   local now_win = hs.window.focusedWindow()
   --get title
   local title = now_win:title()
