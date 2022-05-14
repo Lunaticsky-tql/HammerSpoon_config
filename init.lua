@@ -178,30 +178,17 @@ hyper:bind({}, "c", function()
 end)
 
 
--- --[activate text scanner and scan the text]
--- hyper:bind({}, "z", function()
---   --if the text scanner is not running, start it
---   local app=hs.application.get('Text Scanner')
---   if not app then
---     local scanner = hs.application.launchOrFocus('Text Scanner')
---     --wait for the text scanner to launch
---     hs.timer.doAfter(0.5, function()
---       hs.eventtap.keyStroke({'ctrl','cmd'}, '0')
---     end)
---   else
---     hs.eventtap.keyStroke({'ctrl','cmd'}, '0')
---   end  
---   hyper.triggered = true
--- end)
-
-
-
 
 ------------(hyper 2 keybindings)-----------------------------------------------------
 
 --[sign my homework]
-hyper2:bind({}, "tab", function()
+hyper2:bind({}, "n", function()
   hs.eventtap.keyStrokes('2013599_田佳业_')
+  hyper2.triggered = true
+end)
+
+hyper2:bind({}, "m", function()
+  hs.eventtap.keyStrokes('2013599@mail.nankai.edu.cn')
   hyper2.triggered = true
 end)
 
@@ -236,6 +223,35 @@ hyper2:bind({}, "w", function()
   Win2:focus()
   hyper2.triggered = true
 end)
+
+hyper2:bind({}, "s", function()
+  hs.application.open('/Applications/QQ.app')
+  --wait until the app is opened
+  hs.timer.doAfter(0.3, function()
+    local send_script=[[
+    #bring the qq window to front
+    tell application "QQ" to activate
+    tell application "System Events"
+      tell process "QQ"
+        select row 1 of table 1 of scroll area 1 of splitter group 1 of window 2
+        select text area 1 of scroll area 2 of splitter group 1 of splitter group 1 of window 2
+        #wait for the window to be ready
+        #paste contents
+        keystroke "v" using command down
+        #send
+        keystroke return
+        click button 8 of window 2
+      end tell
+    end tell
+  ]]
+  hs.osascript.applescript(send_script)
+  hs.alert.show("send to QQ",0.5)
+  hyper2.triggered = true
+  
+  end)
+  
+end)
+
 
 
 --test module
@@ -318,7 +334,6 @@ tab_open=hs.hotkey.new({}, 'tab', function()
     end
   end)
 
-
 function enable_firefox_binds()
     --bind the hotkeys
      tab_open:enable()
@@ -329,11 +344,12 @@ function disable_firefox_binds()
  tab_open:disable()
 end
 -- function enable_finder_binds()
---   -- hs.alert.show("finder binds enabled")
---   open_in_terminal:enable()
+--   hs.alert.show("finder binds enabled")
+--   cut:enable()
 -- end
 -- function disable_finder_binds()
---   open_in_terminal:disable()
+--   hs.alert.show("finder binds disabled")
+--   cut:disable()
 -- end
 
 wf_firefox=wf.new{'Firefox'}
@@ -342,6 +358,38 @@ wf_firefox:subscribe(wf.windowUnfocused, disable_firefox_binds)
 -- wf_finder=wf.new{'访达'}
 -- wf_finder:subscribe(wf.windowFocused, enable_finder_binds)
 -- wf_finder:subscribe(wf.windowUnfocused, disable_finder_binds)
+
+hs.hotkey.bind({"ctrl"}, "W", function()
+  --open word
+  local word=hs.application.find("Microsoft Word")
+  word:activate(true)
+end)
+
+hs.hotkey.bind({"alt"}, "s", function()
+  --copy the text
+  hs.alert.show("search google")
+  hs.eventtap.keyStroke({'cmd'}, 'c')
+  local default=hs.pasteboard.readString()
+  local script=[[
+    display dialog "Google search" default answer "]]..default..[[" buttons {"cancel", "go"} default button 2 giving up after 5
+copy the result as list to {text_returned, button_pressed}
+  ]]
+  local response,list = hs.osascript.applescript(script)
+  if list[1]=="go" then
+    local text=list[2]
+    --if there is quotation marks in the text, escape them
+    if string.find(text, '"') then
+      local temp1="%%22"
+      text=string.gsub(text, '["]', temp1)
+    end
+    if string.find(text, "'") then
+      local temp2="%%27"
+      text=string.gsub(text, "[']", temp2)
+    end
+    local shell_command = "open " .."'https://www.google.com/search?q="..text.."'"
+    hs.execute(shell_command)
+  end
+end)
 
 ------------(reload config)-----------------------------------------------------
 hyper:bind({}, "r", function()
