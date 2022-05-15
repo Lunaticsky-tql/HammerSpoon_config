@@ -1,23 +1,26 @@
-
 wf=hs.window.filter
 hyper = hs.hotkey.modal.new({}, 'F19')
 hyper2 = hs.hotkey.modal.new({}, 'F16')
+hyper3=hs.hotkey.modal.new({}, 'F20')
+
 firefox = hs.application.get("Firefox")
 
--- Enter Hyper Mode when F18 (Hyper/Capslock) is pressed
+------------(hyper mode config)------------------------------------------
+-- Enter Hyper Mode
 function enterHyperMode()
   hyper.triggered = false
   hyper:enter()
 end
-
 function enterHyperMode2()
   hyper2.triggered = false
   hyper2:enter()
 end
+function enterHyperMode3()
+  hyper3.triggered = false
+  hyper3:enter()
+end
 
-
--- Leave Hyper Mode when F18 (Hyper/Capslock) is pressed,
--- send ESCAPE if no other keys are pressed.
+-- Leave Hyper Mode
 function exitHyperMode()
   hyper:exit()
   if not hyper.triggered then
@@ -30,7 +33,6 @@ function exitHyperMode()
     end
   end
 end
-
 function exitHyperMode2()
   hyper2:exit()
   if not hyper2.triggered then
@@ -41,18 +43,18 @@ function exitHyperMode2()
     end
   end
 end
-
+function exitHyperMode3()
+  hyper3:exit()
+end
 hs.hotkey.bind({"shift"}, "F15", function()
   hs.eventtap.keyStrokes('~')
 end)
-
-
-
 -- Bind the Hyper key
 F18 = hs.hotkey.bind({}, 'F18', enterHyperMode, exitHyperMode)
 F15 = hs.hotkey.bind({}, 'F15', enterHyperMode2, exitHyperMode2)
+F17 = hs.hotkey.bind({}, 'F17', enterHyperMode3, exitHyperMode3)
 
-
+------------(hyper keybindings)-----------------------------------------------------
 hyper:bind({}, "a", function()
   hs.application.open("/System/Library/CoreServices/Finder.app")
   hyper.triggered = true
@@ -94,20 +96,16 @@ hyper:bind({}, "d", function()
           hs.pasteboard.setContents(result)
         end
         end)
-      -- hs.eventtap.keyStroke({'cmd'}, '0')
     else
     local success,result=hs.osascript.applescript(translate_script)
     if success then
       hs.alert.show("translate success")
-      -- app:activate()
       hs.pasteboard.setContents(result)
     end
   end
 end)
-
 --[add sql code block in typora]
 hyper:bind({},"q", function()
-
   local sql_input=[[```sql]]
   local typora=hs.application.get('Typora')
   if typora:isFrontmost() then
@@ -119,7 +117,7 @@ hyper:bind({},"q", function()
     hs.pasteboard.deletePasteboard(temp_clipboard)
     hs.eventtap.keyStroke({}, 'return')
   else
-    local ssh = hs.application.open('Termius')
+    local ssh = hs.application.open('QQ')
   end
   hyper.triggered = true
 end)
@@ -171,34 +169,24 @@ hyper:bind({}, "c", function()
       hs.eventtap.keyStroke({'cmd'}, 'v')
       hs.pasteboard.writeAllData(nil,hs.pasteboard.readAllData(temp_clipboard))
       hs.pasteboard.deletePasteboard(temp_clipboard)
-      -- hs.eventtap.keyStroke({}, 'return')
     end
   end
   hyper.triggered = true
 end)
-
-
-
 ------------(hyper 2 keybindings)-----------------------------------------------------
 
 --[sign my homework]
-hyper2:bind({}, "n", function()
+hyper3:bind({}, "n", function()
   hs.eventtap.keyStrokes('2013599_田佳业_')
-  hyper2.triggered = true
+  hyper3.triggered = true
 end)
 
-hyper2:bind({}, "m", function()
+hyper3:bind({}, "m", function()
   hs.eventtap.keyStrokes('2013599@mail.nankai.edu.cn')
-  hyper2.triggered = true
+  hyper3.triggered = true
 end)
 
 --[pin the current window]
-hyper2:bind({}, "q", function()
-  Win = hs.window.focusedWindow()
-  hs.alert.show(Win:title().."  is saved",0.5)
-  hyper2.triggered = true
-end)
-
 hyper2:bind({}, "1", function()
   Win1 = hs.window.focusedWindow()
   hs.alert.show(Win1:title().."  is saved as window 1",0.5)
@@ -247,52 +235,8 @@ hyper2:bind({}, "s", function()
   hs.osascript.applescript(send_script)
   hs.alert.show("send to QQ",0.5)
   hyper2.triggered = true
-  
   end)
-  
 end)
-
-
-
---test module
--- hyper:bind({}, "c", function()
---   -- menubar = hs.menubar.new(false)
---   -- menubar:setTitle("Hidden Menu")
---   -- menubar:setMenu( {
---   --     { title = "菜单", fn = function() hs.alert.show("you clicked the item!") end },
---   --     { title = "444" },
---   --   {title="555"}} )
---   -- menubar:popupMenu(hs.mouse.getAbsolutePosition(), true)
---   local table=hs.pasteboard.allContentTypes()
---   for i=1,#table[1] do
---     print(type(table[1][i]))
---   end
---   print(#table[1])
---   local nowcontent=hs.pasteboard.getContents()
---   hs.alert.show(nowcontent)
---   hyper.triggered = true
--- end)
-
-
--- hyper:bind({}, "b", function()
---   local applescript=[[
--- display dialog "表单" default answer "输入框内容" buttons {"按钮1", "按钮2", "按钮3"} default button 1 with icon caution
--- copy the result as list to {text_returned, button_pressed} --返回一个列表{文本,按钮}
-
-
---     ]]
---     --get the list of the result applescript returns
---     local response
---     local list
---     response,list = hs.osascript.applescript(applescript)
---     print(response)
---     print(type(list))     
---     print(list[1])
---     print(list[2])
---   hyper.triggered = true
--- end)
-
-
 
 hyper:bind({}, "s", function()
   hyper.triggered = true
@@ -312,14 +256,6 @@ hyper:bind({}, "s", function()
   hs.execute(shell_command)
 end)
 
--- a potentially useful demo
--- function newWindow() 
---   local app =hs.application.find("Firefox")
---   app:selectMenuItem({"文件", "新建窗口"})
--- end
--- hs.hotkey.bind({'alt', 'ctrl', 'cmd'}, 'n', newWindow)
---make a hot key enables in a certain window
-
 ------------(firefox shortcut)-----------------------------------------------------
 
 tab_open=hs.hotkey.new({}, 'tab', function()
@@ -333,46 +269,57 @@ tab_open=hs.hotkey.new({}, 'tab', function()
     hs.eventtap.keyStroke({'cmd'}, 't')
     end
   end)
+tab_restore=hs.hotkey.new({'alt'}, 'tab', function()
+  hs.eventtap.keyStroke({'cmd','shift'}, 't')
+  end)
+
+tab_clone=hs.hotkey.new({'alt'}, 'c', function()
+  hs.eventtap.keyStroke({},'f6')
+  hs.eventtap.keyStroke({'cmd'}, 'c')
+  local url=hs.pasteboard.readString()
+  local shell_command = "open " .."'"..url.."'"
+  hs.execute(shell_command)
+  end)
 
 function enable_firefox_binds()
     --bind the hotkeys
      tab_open:enable()
+     tab_restore:enable()
+     tab_clone:enable()
 end
 
 function disable_firefox_binds()
     --disable the hotkeys
  tab_open:disable()
+tab_restore:disable()
+tab_clone:disable()
 end
--- function enable_finder_binds()
---   hs.alert.show("finder binds enabled")
---   cut:enable()
--- end
--- function disable_finder_binds()
---   hs.alert.show("finder binds disabled")
---   cut:disable()
--- end
 
 wf_firefox=wf.new{'Firefox'}
 wf_firefox:subscribe(wf.windowFocused, enable_firefox_binds)
 wf_firefox:subscribe(wf.windowUnfocused, disable_firefox_binds)
--- wf_finder=wf.new{'访达'}
--- wf_finder:subscribe(wf.windowFocused, enable_finder_binds)
--- wf_finder:subscribe(wf.windowUnfocused, disable_finder_binds)
 
+----------(global hotkey)-----------------------------------------------------
 hs.hotkey.bind({"ctrl"}, "W", function()
   --open word
   local word=hs.application.find("Microsoft Word")
   word:activate(true)
 end)
-
+--[search google]
 hs.hotkey.bind({"alt"}, "s", function()
-  --copy the text
-  hs.alert.show("search google")
+  local previous_text=hs.pasteboard.readString()
   hs.eventtap.keyStroke({'cmd'}, 'c')
-  local default=hs.pasteboard.readString()
+  --but if the clipboard is not changed do not set default text
+  local now_text=hs.pasteboard.readString()
+  local default
+  if(now_text==previous_text) then
+     default=''
+  else
+  default=now_text
+  end
   local script=[[
-    display dialog "Google search" default answer "]]..default..[[" buttons {"cancel", "go"} default button 2 giving up after 5
-copy the result as list to {text_returned, button_pressed}
+    display dialog "Google search" default answer "]]..default..[[" buttons {"cancel", "go"} default button 2 giving up after 50
+    copy the result as list to {text_returned, button_pressed}
   ]]
   local response,list = hs.osascript.applescript(script)
   if list[1]=="go" then
