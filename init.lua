@@ -52,7 +52,7 @@ end)
 -- Bind the Hyper key
 F18 = hs.hotkey.bind({}, 'F18', enterHyperMode, exitHyperMode)
 F15 = hs.hotkey.bind({}, 'F15', enterHyperMode2, exitHyperMode2)
-F17 = hs.hotkey.bind({}, 'F17', enterHyperMode3, exitHyperMode3)
+F13 = hs.hotkey.bind({}, 'F13', enterHyperMode3, exitHyperMode3)
 
 ------------(hyper keybindings)-----------------------------------------------------
 hyper:bind({}, "a", function()
@@ -280,12 +280,17 @@ tab_clone=hs.hotkey.new({'alt'}, 'c', function()
   local shell_command = "open " .."'"..url.."'"
   hs.execute(shell_command)
   end)
+--[I do not want to see ￥￥ when I am typing formula in latex!]
+  avoid_renminbi=hs.hotkey.new({'shift'}, '4', function()
+    hs.eventtap.keyStrokes('$')
+    end)
 
 function enable_firefox_binds()
     --bind the hotkeys
      tab_open:enable()
      tab_restore:enable()
      tab_clone:enable()
+     avoid_renminbi:enable()
 end
 
 function disable_firefox_binds()
@@ -293,6 +298,7 @@ function disable_firefox_binds()
  tab_open:disable()
 tab_restore:disable()
 tab_clone:disable()
+avoid_renminbi:disable()
 end
 
 wf_firefox=wf.new{'Firefox'}
@@ -304,6 +310,13 @@ hs.hotkey.bind({"ctrl"}, "W", function()
   --open word
   local word=hs.application.find("Microsoft Word")
   word:activate(true)
+end)
+
+hs.hotkey.bind({"alt"}, "b", function()
+  hs.eventtap.keyStrokes('\\begin{equation}')
+end)
+hs.hotkey.bind({"alt"}, "n", function()
+  hs.eventtap.keyStrokes('\\end{equation}')
 end)
 --[search google]
 hs.hotkey.bind({"alt"}, "s", function()
