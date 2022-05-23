@@ -1,10 +1,12 @@
 wf = hs.window.filter
+timer = require("hs.timer")
 hyper = hs.hotkey.modal.new({}, 'F19')
 hyper2 = hs.hotkey.modal.new({}, 'F16')
 hyper3 = hs.hotkey.modal.new({}, 'F20')
-
 firefox = hs.application.get("Firefox")
-
+word = hs.application.get("Microsoft Word")
+--load modules
+ctrlDoublePress = require("ctrlDoublePress")
 ------------(hyper mode config)------------------------------------------
 -- Enter Hyper Mode
 function enterHyperMode()
@@ -123,6 +125,53 @@ hyper:bind({}, "q", function()
     hyper.triggered = true
 end)
 
+hyper:bind({}, "z", function()
+    if word:isFrontmost() then
+        hs.eventtap.keyStroke({'cmd', 'shift'}, 'c')
+    end
+    hyper.triggered = true
+end)
+
+hyper:bind({}, "p", function()
+    local PasteNow=hs.application.get('PasteNow')
+    if PasteNow~=nil then
+        hs.eventtap.keyStroke({'cmd', 'alt','control'}, 'c')
+        local script=[[
+            tell application "System Events"
+            tell process "PasteNow"
+                click button 2 of window 1
+                delay 0.5
+                click button 2 of window 1
+            end tell
+        end tell
+        ]]
+        hs.osascript.applescript(script)
+    else
+        hs.application.open("/Applications/PasteNow.app")
+        hs.timer.doAfter(0.3, function()
+            hs.eventtap.keyStroke({'cmd', 'alt','control'}, 'c')
+            local script=[[
+                tell application "System Events"
+                tell process "PasteNow"
+                    click button 2 of window 1
+                    delay 0.3
+                    click button 2 of window 1
+                end tell
+            end tell
+            ]]
+            hs.osascript.applescript(script)
+        end)
+    end
+    hyper.triggered = true
+end)
+
+hyper:bind({}, "x", function()
+    if word:isFrontmost() then
+        hs.eventtap.keyStroke({'cmd', 'shift'}, 'v')
+    end
+    hyper.triggered = true
+end)
+
 hyper:bind({}, "t", function()
     -- copy path and open in terminal
     local finder = hs.application.get('访达')
@@ -202,13 +251,13 @@ end)
 -- [pin the current window]
 hyper2:bind({}, "1", function()
     Win1 = hs.window.focusedWindow()
-    hs.alert.show(Win1:title() .. "  is saved as window 1", 0.5)
+    Win1:focus()
     hyper2.triggered = true
 end)
 
 hyper2:bind({}, "2", function()
     Win2 = hs.window.focusedWindow()
-    hs.alert.show(Win2:title() .. "  is saved as window 2", 0.5)
+    Win2:focus()
     hyper2.triggered = true
 end)
 
@@ -220,12 +269,37 @@ hyper2:bind({}, "q", function()
 end)
 
 hyper2:bind({}, "w", function()
-    -- focus the window saved in parameter win
-    Win2:focus()
+    local applescript=[[
+        tell application "Finder" to activate
+        tell application "Finder" to open ("/Users/tianjiaye/Downloads" as POSIX file)
+    ]]
+    hs.osascript.applescript(applescript)
     hyper2.triggered = true
 end)
 
+hyper2:bind({}, "a", function()
+    -- open finder with the path of the current file
+    local applescript=[[
+        tell application "Finder" to activate
+        tell application "Finder" to open ("/Users/tianjiaye/截图" as POSIX file)
+    ]]
+    hs.osascript.applescript(applescript)
+    hyper2.triggered = true
+end)
+hyper2:bind({}, "q", function()
+    -- open finder with the path of the current file
+    local applescript=[[
+        tell application "Finder" to activate
+        tell application "Finder" to open ("/Users/tianjiaye/QQ文件" as POSIX file)
+    ]]
+    hs.osascript.applescript(applescript)
+    hyper2.triggered = true
+end)
+
+
+
 hyper2:bind({}, "s", function()
+  hyper2.triggered = true
     hs.application.open('/Applications/QQ.app')
     -- wait until the app is opened
     hs.timer.doAfter(0.3, function()
@@ -247,12 +321,12 @@ hyper2:bind({}, "s", function()
   ]]
         hs.osascript.applescript(send_script)
         hs.alert.show("send to QQ", 0.5)
-        hyper2.triggered = true
     end)
+
 end)
 
 hyper:bind({}, "s", function()
-    hyper.triggered = true
+
     Win = hs.window.focusedWindow()
     hs.eventtap.keyStroke({'cmd'}, 'c')
     local text = hs.pasteboard.readString()
@@ -267,16 +341,10 @@ hyper:bind({}, "s", function()
     end
     local shell_command = "open " .. "'https://www.baidu.com/baidu?tn=monline_3_dg&ie=utf-8&wd=" .. text .. "'"
     hs.execute(shell_command)
+    hyper.triggered = true
 end)
 
 -- [cut the current line]
-hyper:bind({}, 'x', function()
-    hs.eventtap.keyStroke({'cmd'}, 'left')
-    hs.eventtap.keyStroke({'shift'}, 'down')
-    hs.eventtap.keyStroke({'cmd'}, 'x')
-    hyper.triggered = true
-
-end)
 
 ------------(firefox shortcut)-----------------------------------------------------
 
@@ -379,6 +447,24 @@ hs.hotkey.bind({}, 42, function()
   hs.eventtap.keyStrokes('\\')
 end)
 
+hs.hotkey.bind({'shift'}, 42, function()
+  --get the current imput layout
+  local layout=hs.keycodes.currentLayout()
+  if layout=="ABC" then
+    hs.eventtap.keyStrokes('|')
+  else
+    hs.eventtap.keyStrokes('、')
+    end
+end)
+
+hs.hotkey.bind({'alt'}, "x", function()
+    hs.eventtap.keyStroke({'cmd'}, 'left')
+    hs.eventtap.keyStroke({'shift'}, 'down')
+    hs.eventtap.keyStroke({'cmd'}, 'x')
+    hs.eventtap.keyStroke({}, 'up')
+    hs.eventtap.keyStroke({'cmd'}, 'right')
+end)
+
 -- [I do not want to see ￥￥ when I am typing formula in latex!]
 hs.hotkey.bind({'shift'}, '4', function()
   hs.eventtap.keyStrokes('$')
@@ -419,9 +505,17 @@ hs.hotkey.bind({"alt"}, "s", function()
 end)
 
 ------------(reload config)-----------------------------------------------------
-hyper:bind({}, "r", function()
-    hs.eventtap.keyStroke({'cmd'}, 's')
-    hs.reload()
-    hyper.triggered = true
-end)
-hs.alert("Config loaded")
+function reloadConfig(files)
+    doReload = false
+    for _,file in pairs(files) do
+        if file:sub(-4) == ".lua" then
+            doReload = true
+        end
+    end
+    if doReload then
+        hs.reload()
+    end
+end
+myWatcher = hs.pathwatcher.new(os.getenv("HOME") .. "/.hammerspoon/", reloadConfig):start()
+hs.alert.show("Config loaded")
+
