@@ -238,14 +238,14 @@ end)
 ------------(hyper 2 keybindings)-----------------------------------------------------
 
 -- [sign my homework]
-hyper3:bind({}, "n", function()
+hyper2:bind({}, "n", function()
     hs.eventtap.keyStrokes('2013599_田佳业_')
-    hyper3.triggered = true
+    hyper2.triggered = true
 end)
 
-hyper3:bind({}, "m", function()
+hyper2:bind({}, "m", function()
     hs.eventtap.keyStrokes('2013599@mail.nankai.edu.cn')
-    hyper3.triggered = true
+    hyper2.triggered = true
 end)
 
 -- [pin the current window]
@@ -296,33 +296,14 @@ hyper2:bind({}, "q", function()
     hyper2.triggered = true
 end)
 
-
-
-hyper2:bind({}, "s", function()
-  hyper2.triggered = true
-    hs.application.open('/Applications/QQ.app')
-    -- wait until the app is opened
-    hs.timer.doAfter(0.3, function()
-        local send_script = [[
-    #bring the qq window to front
-    tell application "QQ" to activate
-    tell application "System Events"
-      tell process "QQ"
-        select row 1 of table 1 of scroll area 1 of splitter group 1 of window 2
-        select text area 1 of scroll area 2 of splitter group 1 of splitter group 1 of window 2
-        #wait for the window to be ready
-        #paste contents
-        keystroke "v" using command down
-        #send
-        keystroke return
-        click button 8 of window 2
-      end tell
-    end tell
-  ]]
-        hs.osascript.applescript(send_script)
-        hs.alert.show("send to QQ", 0.5)
-    end)
-
+hyper2:bind({}, "tab", function()
+    -- open finder with the path of the current file
+    local applescript=[[
+        tell application "Finder" to activate
+        tell application "Finder" to open ("/Users/tianjiaye/临时文稿" as POSIX file)
+    ]]
+    hs.osascript.applescript(applescript)
+    hyper2.triggered = true
 end)
 
 hyper:bind({}, "s", function()
@@ -455,14 +436,6 @@ hs.hotkey.bind({'shift'}, 42, function()
   else
     hs.eventtap.keyStrokes('、')
     end
-end)
-
-hs.hotkey.bind({'alt'}, "x", function()
-    hs.eventtap.keyStroke({'cmd'}, 'left')
-    hs.eventtap.keyStroke({'shift'}, 'down')
-    hs.eventtap.keyStroke({'cmd'}, 'x')
-    hs.eventtap.keyStroke({}, 'up')
-    hs.eventtap.keyStroke({'cmd'}, 'right')
 end)
 
 -- [I do not want to see ￥￥ when I am typing formula in latex!]

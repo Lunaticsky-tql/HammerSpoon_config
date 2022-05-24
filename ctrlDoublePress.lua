@@ -17,7 +17,12 @@ module.timeFrame = 0.5
 
 -- what to do when the double tap of ctrl occurs
 module.action = function()
-    hs.alert("You double tapped ctrl!")
+    local applescript=[[
+        tell application "Finder" to activate
+        tell application "Finder" to open ("/Users/tianjiaye/Documents" as POSIX file)
+
+    ]]
+    hs.osascript.applescript(applescript)
 end
 
 local timeFirstControl, firstDown, secondDown = 0, false, false
@@ -78,44 +83,44 @@ module.eventWatcher = hs.eventtap.new({events.flagsChanged, events.keyDown}, fun
     return false
 end):start()
 
-module.mouseWatcher = hs.eventtap.new({events.leftMouseDown}, function(em)
-    a=em:getProperty(hs.eventtap.event.properties["mouseEventClickState"])
-    if a==2 then
-        local layout_icon=hs.keycodes.currentLayoutIcon()
-        local finder=hs.application.get("访达")
-        -- if (layout_icon and not finder:isFrontmost())then
-        --     local mouse_position=hs.mouse.getAbsolutePosition()
-        --     local canvas=hs.canvas.new{x=mouse_position.x,y=mouse_position.y-20,h=20,w=20}:appendElements(
-        --         {
-        --             --  type="image",
-        --             -- image=layout_icon,
+-- module.mouseWatcher = hs.eventtap.new({events.leftMouseDown}, function(em)
+--     a=em:getProperty(hs.eventtap.event.properties["mouseEventClickState"])
+--     if a==2 then
+--         local layout_icon=hs.keycodes.currentLayoutIcon()
+--         local finder=hs.application.get("访达")
+--         -- if (layout_icon and not finder:isFrontmost())then
+--         --     local mouse_position=hs.mouse.getAbsolutePosition()
+--         --     local canvas=hs.canvas.new{x=mouse_position.x,y=mouse_position.y-20,h=20,w=20}:appendElements(
+--         --         {
+--         --             --  type="image",
+--         --             -- image=layout_icon,
                     
-        --         }
-        --     ):show()
-        --     hs.timer.doAfter(0.8,function()
-        --         canvas:delete()
-        --     end)
-        -- end
-        local text=""
-        if(layout_icon) then
-            text="A"
-        else
-            text="拼"
-        end
-        if not finder:isFrontmost() then 
-            local mouse_position=hs.mouse.getAbsolutePosition()
-            local canvas=hs.canvas.new{x=mouse_position.x+10,y=mouse_position.y-28,h=18,w=18}:appendElements(
-                {
-                    type="text",
-                    text=hs.styledtext.new(text,{font={size=18}}),
-                }
-            ):show()
-            hs.timer.doAfter(0.5,function()
-                canvas:delete()
-            end)
-        end
-    end
-    return false
-end):start()
+--         --         }
+--         --     ):show()
+--         --     hs.timer.doAfter(0.8,function()
+--         --         canvas:delete()
+--         --     end)
+--         -- end
+--         local text=""
+--         if(layout_icon) then
+--             text="A"
+--         else
+--             text="拼"
+--         end
+--         if not finder:isFrontmost() then 
+--             local mouse_position=hs.mouse.getAbsolutePosition()
+--             local canvas=hs.canvas.new{x=mouse_position.x+10,y=mouse_position.y-28,h=18,w=18}:appendElements(
+--                 {
+--                     type="text",
+--                     text=hs.styledtext.new(text,{font={size=18}}),
+--                 }
+--             ):show()
+--             hs.timer.doAfter(0.5,function()
+--                 canvas:delete()
+--             end)
+--         end
+--     end
+--     return false
+-- end):start()
 
 return module
